@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claims Tracker — GoldAura Therapy</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ── BRAND TOKENS ─────────────────────────────────── */
+        :root {
+            --ivory:     #F6F5F4;
+            --cordovan:  #4A2520;
+            --gold:      #DBBF7A;
+            --cedar:     #9E6B6B;
+            --mauve:     #7D6575;
+            --ink:       #1C1A18;
+            --muted:     #6B6457;
+            --border:    #E2E0DE;
+            --card-bg:   #FDFCFC;
+            --warm-bg:   #F0EEEC;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--warm-bg);
+            padding: 24px 20px 48px;
+            min-height: 100vh;
+            color: var(--ink);
+        }
+
+        /* Subtle top accent bar */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cordovan), var(--gold));
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1380px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 16px rgba(74, 37, 32, 0.06);
+            padding: 40px;
+        }
+
+        /* ── SETUP SCREEN ─────────────────────────────────── */
+        .setup-screen {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .setup-emblem {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 28px;
+        }
+
+        .setup-emblem-dot {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: var(--gold);
+        }
+
+        .setup-screen h1 {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 32px;
+            color: var(--cordovan);
+            margin-bottom: 8px;
+        }
+
+        .setup-screen .subtitle {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 40px;
+        }
+
+        .setup-instructions {
+            background: var(--ivory);
+            border: 1px solid var(--border);
+            padding: 32px;
+            border-radius: 12px;
+            text-align: left;
+            margin: 0 auto 32px;
+            max-width: 760px;
+        }
+
+        .setup-instructions h3 {
+            font-family: 'DM Serif Display', Georgia, serif;
+            color: var(--cordovan);
+            margin-bottom: 18px;
+            font-size: 18px;
+        }
+
+        .setup-instructions ol {
+            margin-left: 20px;
+            line-height: 1.9;
+            color: var(--ink);
+        }
+
+        .setup-instructions li { margin-bottom: 10px; font-size: 14px; }
+
+        .setup-instructions code {
+            background: var(--border);
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--cordovan);
+        }
+
+        .auth-button {
+            background: var(--gold);
+            color: var(--cordovan);
+            padding: 14px 36px;
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .auth-button:hover {
+            background: #c9aa60;
+            box-shadow: 0 4px 16px rgba(195, 165, 101, 0.4);
+        }
+
+        .auth-button:disabled {
+            background: var(--muted);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* ── APP HEADER ───────────────────────────────────── */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left { display: flex; flex-direction: column; gap: 2px; }
+
+        .app-eyebrow {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 2px;
+        }
+
+        .app-title {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 26px;
+            color: var(--cordovan);
+            line-height: 1;
+        }
+
+        .app-subtitle {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* ── BUTTONS ──────────────────────────────────────── */
+        .btn-primary {
+            background: var(--mauve);
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            background: #6a5362;
+            box-shadow: 0 3px 10px rgba(125, 101, 117, 0.3);
+        }
+
+        .btn-secondary-outline {
+            background: transparent;
+            color: var(--ink);
+            border: 1px solid var(--border);
+            padding: 9px 20px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .btn-secondary-outline:hover {
+            background: var(--ivory);
+            border-color: var(--muted);
+        }
+
+        .btn {
+            background: var(--mauve);
+            color: white;
+            border: 1px solid var(--mauve);
+            padding: 7px 14px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn:hover { background: #6a5362; border-color: #6a5362; color: white; }
+
+        .btn.btn-secondary {
+            background: white;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            margin-left: 0;
+        }
+
+        .btn.btn-secondary:hover { background: #FEF2F2; border-color: #FECACA; color: #DC2626; }
+
+        /* ── USER BAR ─────────────────────────────────────── */
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 12px 18px;
+            background: var(--ivory);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .user-left { display: flex; align-items: center; gap: 12px; }
+
+        .user-avatar {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: var(--cordovan);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700;
+            color: var(--gold);
+            flex-shrink: 0;
+        }
+
+        .user-info .email {
+            font-weight: 500;
+            color: var(--ink);
+            font-size: 13px;
+        }
+
+        .spreadsheet-link {
+            color: var(--gold);
+            text-decoration: none;
+            font-size: 12px;
+            margin-left: 14px;
+            font-weight: 500;
+        }
+
+        .spreadsheet-link:hover { text-decoration: underline; }
+
+        .sign-out-btn {
+            background: transparent;
+            color: #DC2626;
+            padding: 7px 16px;
+            border: 1px solid #FECACA;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .sign-out-btn:hover { background: #FEF2F2; }
+
+        /* ── SYNC STATUS ──────────────────────────────────── */
+        .sync-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            color: #166534;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .sync-status .sync-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #22C55E;
+        }
+
+        .sync-status.syncing {
+            background: #FFFBEB;
+            border-color: #FCD34D;
+            color: #92400E;
+        }
+
+        .sync-status.error {
+            background: #FEF2F2;
+            border-color: #FECACA;
+            color: #DC2626;
+        }
+
+        /* ── STAT CARDS ───────────────────────────────────── */
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 22px 26px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 4px rgba(74,37,32,0.04);
+            transition: all 0.2s;
+            flex: 1 1 0;
+            min-width: 160px;
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 6px 20px rgba(74,37,32,0.08);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 36px;
+            color: var(--cordovan);
+            line-height: 1;
+        }
+
+        #latestDateSubmitted {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--ink);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        .all-time-link {
+            color: var(--border);
+            text-decoration: none;
+            font-size: 11.5px;
+            letter-spacing: 0.02em;
+            margin: 6px 0 24px 2px;
+            display: inline-block;
+            transition: color 0.2s;
+        }
+
+        .all-time-link:hover { color: var(--muted); }
+
+        /* ── QUICK ADD ────────────────────────────────────── */
+        .quick-add-section { margin-bottom: 0; }
+
+        .quick-add-toggle-btn {
+            width: 100%;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--ink);
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .quick-add-toggle-btn:hover { background: var(--ivory); border-color: #bfbbaf; }
+
+        .quick-add-icon {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: var(--cordovan);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--ivory);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .quick-add-toggle-btn .toggle-arrow {
+            margin-left: auto;
+            font-size: 11px;
+            color: var(--muted);
+            transition: transform 0.25s ease;
+        }
+
+        .quick-add-toggle-btn.open .toggle-arrow { transform: rotate(180deg); }
+
+        .quick-add-wrapper {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.35s ease, opacity 0.25s ease;
+        }
+
+        .quick-add-wrapper.open {
+            max-height: 600px;
+            opacity: 1;
+        }
+
+        .quick-add-form-inner {
+            background: var(--ivory);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            padding: 24px;
+        }
+
+        .section-spacer { margin-bottom: 24px; }
+
+        /* ── FORMS ────────────────────────────────────────── */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .form-group { display: flex; flex-direction: column; }
+
+        label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input, select {
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--ink);
+            background: white;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(195,165,101,0.12);
+        }
+
+        input::placeholder { color: #C0B8AE; }
+
+        .quick-add-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-add-session {
+            background: var(--mauve);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-add-session:hover { background: #6a5362; }
+        .btn-add-session:disabled { background: var(--muted); cursor: not-allowed; }
+
+        .btn-clear-inline {
+            background: white;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-clear-inline:hover { background: var(--ivory); border-color: #bfbbaf; }
+
+        .quick-add-success {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            color: #166534;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .quick-add-success.visible { display: flex; }
+
+        /* ── FILTERS ──────────────────────────────────────── */
+        .filters {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box { flex: 1; min-width: 200px; }
+
+        /* ── TABLE SECTION ────────────────────────────────── */
+        .table-container { overflow-x: auto; }
+
+        .table-toggle-btn {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--ink);
+            cursor: pointer;
+            margin-bottom: 18px;
+            width: 100%;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .table-toggle-btn:hover { background: var(--ivory); border-color: #bfbbaf; }
+
+        #tableWrapper {
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
+        }
+
+        #tableWrapper.collapsed { max-height: 0; opacity: 0; }
+
+        /* Table header bar */
+        .table-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .table-section-title {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 17px;
+            color: var(--cordovan);
+        }
+
+        .table-controls { display: flex; gap: 8px; }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        thead th {
+            background: var(--ivory);
+            color: var(--muted);
+            padding: 11px 13px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        tbody td {
+            padding: 13px;
+            border-bottom: 1px solid #F0EDE7;
+            font-size: 13px;
+            color: var(--ink);
+            vertical-align: middle;
+        }
+
+        tbody tr:hover td { background: #FAFAF6; }
+        tbody tr:last-child td { border-bottom: none; }
+
+        /* ── STATUS BADGES ────────────────────────────────── */
+        .status-pending {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: #FEF3C7; color: #92400E;
+            font-size: 10px; font-weight: 700;
+            padding: 3px 10px; border-radius: 999px;
+            letter-spacing: 0.08em; text-transform: uppercase;
+        }
+
+        .status-submitted {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: #F0FDF4; color: #166534;
+            font-size: 10px; font-weight: 700;
+            padding: 3px 10px; border-radius: 999px;
+            letter-spacing: 0.08em; text-transform: uppercase;
+        }
+
+        /* ── ACTION BUTTONS IN TABLE ──────────────────────── */
+        .action-btn {
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--muted);
+            transition: all 0.15s;
+            margin-right: 4px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        .action-btn:hover { background: var(--ivory); border-color: #bfbbaf; color: var(--ink); }
+
+        /* Mark Submitted CTA in table */
+        .action-btn.submit-action {
+            background: var(--mauve);
+            color: white;
+            border-color: var(--mauve);
+        }
+
+        .action-btn.submit-action:hover { background: #6a5362; }
+
+        /* Delete */
+        .btn.btn-secondary { /* keep override for delete */ }
+
+        /* ── EMPTY / LOADING STATES ───────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* ── LOADING SPINNER ──────────────────────────────── */
+        .loading {
+            display: inline-block;
+            width: 18px; height: 18px;
+            border: 2px solid var(--border);
+            border-top: 2px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ── MODALS ───────────────────────────────────────── */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(28,26,24,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 64px rgba(74,37,32,0.2);
+            max-width: 580px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.25s ease;
+        }
+
+        .modal-large { max-width: 880px; }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(-16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 28px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header-inner { display: flex; flex-direction: column; gap: 1px; }
+
+        .modal-eyebrow {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        .modal-header h2 {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 20px;
+            color: var(--cordovan);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 26px;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 0;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+
+        .modal-close:hover { background: var(--ivory); color: var(--ink); }
+
+        .modal-body { padding: 28px; }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 18px 28px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Modal form grid */
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* ── ALL-TIME STATS ───────────────────────────────── */
+        .all-time-stats { display: flex; flex-direction: column; gap: 12px; }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 18px;
+            background: var(--ivory);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-label-alt {
+            font-size: 13px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .stat-value-alt {
+            font-family: 'DM Serif Display', Georgia, serif;
+            font-size: 28px;
+            color: var(--cordovan);
+        }
+
+        /* ── CLIENTS TABLE ────────────────────────────────── */
+        .clients-table { width: 100%; border-collapse: collapse; }
+
+        .clients-table th {
+            background: var(--ivory);
+            padding: 11px 13px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .clients-table td {
+            padding: 14px 13px;
+            border-bottom: 1px solid #F0EDE7;
+            font-size: 13px;
+            color: var(--ink);
+        }
+
+        .clients-table tr:hover td { background: #FAFAF6; }
+        .clients-table tr:last-child td { border-bottom: none; }
+
+        /* ── HIDDEN ───────────────────────────────────────── */
+        .hidden { display: none; }
+
+        /* ── RESPONSIVE ───────────────────────────────────── */
+        @media (max-width: 768px) {
+            body { padding: 12px 12px 40px; }
+            .container { padding: 20px; }
+            .app-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+            .header-right { width: auto; }
+            .form-row { grid-template-columns: 1fr 1fr; }
+            .quick-add-form-inner .form-row { grid-template-columns: 1fr 1fr; }
+            .modal-form-grid { grid-template-columns: 1fr; }
+            .modal-content { width: 95%; max-height: 95vh; }
+            .stats { flex-direction: column; }
+        }
+
+        @media (max-width: 500px) {
+            .form-row { grid-template-columns: 1fr; }
+            .quick-add-form-inner .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ── SETUP SCREEN ──────────────────────────────────── -->
+    <div id="setupScreen" class="setup-screen">
+        <div class="setup-emblem"><div class="setup-emblem-dot"></div></div>
+        <h1>Claims Tracker</h1>
+        <p class="subtitle">Connect your Google account to sync sessions across all devices</p>
+
+        <div class="setup-instructions">
+            <h3>One-Time Setup</h3>
+            <p style="margin-bottom:18px; font-size:13px; color:var(--muted);">To sync across devices, connect this tool to your Google account.</p>
+            <ol>
+                <li><strong>Go to <a href="https://console.cloud.google.com/" target="_blank" style="color:var(--gold);">Google Cloud Console</a></strong> and enable the Google Sheets API</li>
+                <li>Create an OAuth 2.0 Client ID under Credentials</li>
+                <li>Add this page's URL to Authorized JavaScript Origins</li>
+                <li>Paste your Client ID below and click Connect</li>
+            </ol>
+            <div style="margin-top:22px;">
+                <label for="clientIdInput">Google OAuth Client ID</label>
+                <input type="text" id="clientIdInput" placeholder="Your-Client-ID.apps.googleusercontent.com" style="width:100%; margin-top:6px;">
+                <p style="font-size:11px; color:var(--muted); margin-top:8px;">Saved in your browser for future sessions.</p>
+            </div>
+        </div>
+
+        <button class="auth-button" onclick="initializeAuth()" id="connectBtn">
+            🔐 Connect to Google
+        </button>
+
+        <div style="margin-top:28px; padding:18px 24px; background:var(--ivory); border:1px solid var(--border); border-radius:10px; max-width:760px; margin-left:auto; margin-right:auto;">
+            <p style="font-size:12px; color:var(--muted); line-height:1.7;">
+                <strong style="color:var(--cordovan);">Note:</strong> You may see a browser security warning — this is expected for personal tools. Click "Advanced" and "Proceed" to continue. Your data stays in your Google Sheets only.
+            </p>
+        </div>
+    </div>
+
+    <!-- ── MAIN APP ──────────────────────────────────────── -->
+    <div id="mainApp" class="hidden">
+
+        <!-- Header -->
+        <div class="app-header">
+            <div class="header-left">
+                <div class="app-eyebrow">GoldAura Therapy</div>
+                <h1 class="app-title">Claims Tracker</h1>
+                <p class="app-subtitle">Insurance claim submissions at a glance</p>
+            </div>
+            <div class="header-right">
+                <button class="btn-secondary-outline" onclick="openClientsModal()">
+                    👤 Clients
+                </button>
+                <button class="btn-primary" onclick="openNewClaimModal()">
+                    <span style="font-size:16px; line-height:1;">+</span> New Claim
+                </button>
+            </div>
+        </div>
+
+        <!-- User bar -->
+        <div class="user-info">
+            <div class="user-left">
+                <div class="user-avatar">M</div>
+                <div>
+                    <span class="email" id="userEmail"></span>
+                    <a href="#" class="spreadsheet-link" id="spreadsheetLink" target="_blank">📊 Open in Google Sheets</a>
+                </div>
+            </div>
+            <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
+        </div>
+
+        <!-- Sync status -->
+        <div class="sync-status" id="syncStatus">
+            <span class="sync-dot"></span>
+            <span>Synced</span>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Last Client Submitted</div>
+                <div id="latestDateSubmitted">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pending</div>
+                <div class="stat-number" id="pendingCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label" id="monthlySubmittedLabel">Submitted This Month</div>
+                <div class="stat-number" id="monthlySubmittedCount">0</div>
+            </div>
+        </div>
+        <div style="margin: 6px 0 22px 2px;">
+            <a href="#" class="all-time-link" onclick="openAllTimeStatsModal(); return false;">View all-time stats →</a>
+        </div>
+
+        <!-- Quick Add -->
+        <div class="quick-add-section">
+            <button class="quick-add-toggle-btn" id="quickAddToggleBtn" onclick="toggleQuickAdd()">
+                <span class="quick-add-icon">+</span>
+                <span>Quick Add Session</span>
+                <span class="toggle-arrow">▼</span>
+            </button>
+            <div class="quick-add-wrapper" id="quickAddWrapper">
+                <div class="quick-add-form-inner">
+                    <form id="inlineSessionForm" onsubmit="handleInlineFormSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Client Name</label>
+                                <input type="text" id="inline_clientName" placeholder="e.g., Sarah M." required autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label>Account Number</label>
+                                <input type="text" id="inline_accountNumber" placeholder="e.g., MG-01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Copay (Optional)</label>
+                                <input type="text" id="inline_copay" placeholder="e.g., $30.00">
+                            </div>
+                            <div class="form-group">
+                                <label>Session Date</label>
+                                <input type="date" id="inline_sessionDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Insurance Company</label>
+                                <select id="inline_insuranceCompany" required>
+                                    <option value="">Select Insurance</option>
+                                    <option value="Aetna">Aetna</option>
+                                    <option value="Blue Cross Blue Shield">Blue Cross Blue Shield</option>
+                                    <option value="Cigna">Cigna</option>
+                                    <option value="State Health Plan">State Health Plan</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Insurance # (Optional)</label>
+                                <input type="text" id="inline_insuranceNumber" placeholder="e.g., ABC123456">
+                            </div>
+                            <div class="form-group">
+                                <label>Diagnosis Code (Optional)</label>
+                                <input type="text" id="inline_diagnosisCode" placeholder="e.g., F41.1">
+                            </div>
+                            <div class="form-group">
+                                <label>Date Submitted (Optional)</label>
+                                <input type="date" id="inline_dateSubmitted">
+                            </div>
+                        </div>
+                        <div class="quick-add-actions">
+                            <button type="submit" class="btn-add-session" id="inlineSubmitBtn">Add Session</button>
+                            <button type="button" class="btn-clear-inline" onclick="clearInlineForm()">Clear</button>
+                            <span class="quick-add-success" id="quickAddSuccess">✓ Session added</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="section-spacer"></div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="form-group search-box">
+                <label>Search Client</label>
+                <input type="text" id="searchClient" placeholder="Search by client name...">
+            </div>
+            <div class="form-group">
+                <label>Filter by Insurance</label>
+                <select id="filterInsurance">
+                    <option value="">All Insurance Companies</option>
+                    <option value="Aetna">Aetna</option>
+                    <option value="Blue Cross Blue Shield">Blue Cross Blue Shield</option>
+                    <option value="Cigna">Cigna</option>
+                    <option value="State Health Plan">State Health Plan</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Filter by Status</label>
+                <select id="filterStatus">
+                    <option value="">All Sessions</option>
+                    <option value="pending">Pending Submission</option>
+                    <option value="submitted">Submitted</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Sessions Table -->
+        <div class="table-container">
+            <button class="table-toggle-btn" onclick="toggleTable()" id="tableToggleBtn">
+                ▼ Hide Sessions Table
+            </button>
+            <div id="tableWrapper">
+                <div class="table-header-bar">
+                    <div class="table-section-title">Sessions</div>
+                    <div class="table-controls">
+                        <button class="btn" onclick="toggleSort()" id="sortBtn">Newest First ▼</button>
+                        <button class="btn" onclick="toggleSortByStatus()" id="sortStatusBtn">Sort by Status</button>
+                        <button class="btn" onclick="toggleHideCompleted()" id="hideCompletedBtn">Hide Completed</button>
+                    </div>
+                </div>
+                <table id="sessionsTable">
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Session Date</th>
+                            <th>Insurance</th>
+                            <th>Insurance #</th>
+                            <th>Diagnosis Code</th>
+                            <th>Account #</th>
+                            <th>Copay</th>
+                            <th>Date Submitted</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionsBody">
+                        <tr>
+                            <td colspan="10" class="empty-state">
+                                <div class="loading"></div>
+                                <p style="margin-top:10px;">Loading your sessions...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div><!-- /mainApp -->
+
+    <!-- ── NEW CLAIM MODAL ───────────────────────────────── -->
+    <div id="newClaimModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-inner">
+                    <div class="modal-eyebrow">Session Record</div>
+                    <h2>New Claim</h2>
+                </div>
+                <button class="modal-close" onclick="closeNewClaimModal()">&times;</button>
+            </div>
+            <form id="sessionForm">
+                <div class="modal-body">
+                    <div class="modal-form-grid">
+                        <div class="form-group">
+                            <label>Client Name</label>
+                            <input type="text" id="clientName" placeholder="First, Last Initial (e.g., Sarah M.)" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label>Account Number</label>
+                            <input type="text" id="accountNumber" placeholder="e.g., MG-01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Copay (Optional)</label>
+                            <input type="text" id="copay" placeholder="e.g., $30.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Session Date</label>
+                            <input type="date" id="sessionDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Insurance Company</label>
+                            <select id="insuranceCompany" required>
+                                <option value="">Select Insurance</option>
+                                <option value="Aetna">Aetna</option>
+                                <option value="Blue Cross Blue Shield">Blue Cross Blue Shield</option>
+                                <option value="Cigna">Cigna</option>
+                                <option value="State Health Plan">State Health Plan</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Insurance Number (Optional)</label>
+                            <input type="text" id="insuranceNumber" placeholder="e.g., ABC123456">
+                        </div>
+                        <div class="form-group">
+                            <label>Diagnosis Code (Optional)</label>
+                            <input type="text" id="diagnosisCode" placeholder="e.g., F41.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Date Submitted (Optional)</label>
+                            <input type="date" id="dateSubmitted">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-clear-inline" onclick="closeNewClaimModal()">Cancel</button>
+                    <button type="submit" class="btn-primary" id="submitBtn" style="border-radius:8px;">Add Session</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── CLIENTS MODAL ─────────────────────────────────── -->
+    <div id="clientsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <div class="modal-header-inner">
+                    <div class="modal-eyebrow">GoldAura Therapy</div>
+                    <h2>Clients</h2>
+                </div>
+                <button class="modal-close" onclick="closeClientsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="clients-table">
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Total Claims</th>
+                            <th>Pending</th>
+                            <th>Last Submission</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientsTableBody">
+                        <tr><td colspan="4" style="text-align:center; padding:40px; color:var(--muted);">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── ALL-TIME STATS MODAL ──────────────────────────── -->
+    <div id="allTimeStatsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-inner">
+                    <div class="modal-eyebrow">Overview</div>
+                    <h2>All-Time Statistics</h2>
+                </div>
+                <button class="modal-close" onclick="closeAllTimeStatsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="all-time-stats">
+                    <div class="stat-row">
+                        <span class="stat-label-alt">Total Sessions Ever</span>
+                        <span class="stat-value-alt" id="allTimeTotalSessions">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label-alt">Total Submitted Ever</span>
+                        <span class="stat-value-alt" id="allTimeSubmittedCount">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label-alt">Total Pending</span>
+                        <span class="stat-value-alt" id="allTimePendingCount">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /container -->
+
+<!-- ── SCRIPTS — ALL LOGIC UNCHANGED ────────────────────── -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+    let accessToken = null;
+    let spreadsheetId = null;
+    let sessions = [];
+    let tokenClient = null;
+    let gapiInited = false;
+    let gisInited = false;
+    let editingSessionId = null;
+    let sortOrder = 'desc';
+    let sortByStatus = false;
+    let hideCompleted = false;
+    let clientLookup = {};
+
+    const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+
+    function gapiLoaded() { gapi.load('client', initializeGapiClient); }
+
+    async function initializeGapiClient() {
+        await gapi.client.init({ discoveryDocs: [DISCOVERY_DOC] });
+        gapiInited = true;
+    }
+
+    function gisLoaded() { gisInited = true; }
+
+    async function initializeAuth() {
+        const clientId = document.getElementById('clientIdInput').value.trim();
+        if (!clientId) { alert('Please enter your Google OAuth Client ID'); return; }
+        localStorage.setItem('googleClientId', clientId);
+        document.getElementById('connectBtn').disabled = true;
+        document.getElementById('connectBtn').innerHTML = '<div class="loading"></div> Connecting...';
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: SCOPES,
+            callback: async (response) => {
+                if (response.error !== undefined) { showError('Authentication failed: ' + response.error); return; }
+                accessToken = response.access_token;
+                await initializeApp();
+            },
+        });
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+
+    async function initializeApp() {
+        try {
+            const userInfo = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            const userData = await userInfo.json();
+            document.getElementById('userEmail').textContent = userData.email;
+            spreadsheetId = localStorage.getItem('claimsSpreadsheetId');
+            if (!spreadsheetId) {
+                await createSpreadsheet();
+            } else {
+                try {
+                    await gapi.client.sheets.spreadsheets.get({ spreadsheetId });
+                } catch (error) {
+                    await createSpreadsheet();
+                }
+            }
+            document.getElementById('spreadsheetLink').href = `https://docs.google.com/spreadsheets/d/${spreadsheetId}`;
+            await loadSessions();
+            const setupScreen = document.getElementById('setupScreen');
+            setupScreen.classList.add('hidden');
+            setupScreen.style.display = 'none';
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('sessionDate').valueAsDate = new Date();
+            document.getElementById('inline_sessionDate').valueAsDate = new Date();
+            document.getElementById('sessionForm').addEventListener('submit', handleFormSubmit);
+            document.getElementById('searchClient').addEventListener('input', renderSessions);
+            document.getElementById('filterInsurance').addEventListener('change', renderSessions);
+            document.getElementById('filterStatus').addEventListener('change', renderSessions);
+        } catch (error) {
+            showError('Failed to initialize: ' + error.message);
+        }
+    }
+
+    async function createSpreadsheet() {
+        setSyncStatus('Creating spreadsheet...', 'syncing');
+        const resource = {
+            properties: { title: 'Insurance Claims Tracker - GoldAura Therapy' },
+            sheets: [{ properties: { title: 'Claims', gridProperties: { frozenRowCount: 1 } } }]
+        };
+        const response = await gapi.client.sheets.spreadsheets.create({ resource });
+        spreadsheetId = response.result.spreadsheetId;
+        localStorage.setItem('claimsSpreadsheetId', spreadsheetId);
+        await gapi.client.sheets.spreadsheets.values.update({
+            spreadsheetId, range: 'Claims!A1:I1', valueInputOption: 'RAW',
+            resource: { values: [['ID','Client Name','Account Number','Copay','Session Date','Insurance Company','Insurance Number','Diagnosis Code','Date Submitted']] }
+        });
+        await gapi.client.sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            resource: { requests: [{ repeatCell: { range: { sheetId: 0, startRowIndex: 0, endRowIndex: 1 },
+                cell: { userEnteredFormat: { backgroundColor: { red: 0.29, green: 0.145, blue: 0.125 },
+                    textFormat: { foregroundColor: { red: 1, green: 1, blue: 1 }, bold: true } } },
+                fields: 'userEnteredFormat(backgroundColor,textFormat)' } }] }
+        });
+        setSyncStatus('Synced', 'success');
+    }
+
+    async function loadSessions() {
+        setSyncStatus('Loading...', 'syncing');
+        try {
+            const response = await gapi.client.sheets.spreadsheets.values.get({ spreadsheetId, range: 'Claims!A1:I' });
+            const rows = response.result.values || [];
+            if (rows.length === 0) { sessions = []; renderSessions(); updateStats(); checkPending(); setSyncStatus('Synced','success'); return; }
+            const headers = rows[0];
+            const hasAccountNumber = headers[2] === 'Account Number';
+            const hasInsuranceNumber = headers[6] === 'Insurance Number';
+            if (!hasAccountNumber && rows.length > 1) { await migrateToNewFormat(rows); return; }
+            else if (hasAccountNumber && !hasInsuranceNumber && rows.length > 1) { await migrateTo9Columns(rows); return; }
+            sessions = rows.slice(1).map(row => ({
+                id: parseInt(row[0]), clientName: row[1]||'', accountNumber: row[2]||'',
+                copay: row[3]||'', sessionDate: row[4]||'', insuranceCompany: row[5]||'',
+                insuranceNumber: row[6]||'', diagnosisCode: row[7]||'', dateSubmitted: row[8]||null
+            }));
+            clientLookup = {};
+            sessions.forEach(s => {
+                if (s.clientName && !clientLookup[s.clientName.toLowerCase()])
+                    clientLookup[s.clientName.toLowerCase()] = { name: s.clientName, accountNumber: s.accountNumber, copay: s.copay };
+            });
+            renderSessions(); updateStats(); updateLatestDateSubmitted(); checkPending();
+            setSyncStatus('Synced', 'success');
+        } catch (error) { showError('Failed to load sessions: ' + error.message); }
+    }
+
+    async function migrateToNewFormat(oldRows) {
+        setSyncStatus('Migrating data...', 'syncing');
+        try {
+            const newData = [['ID','Client Name','Account Number','Copay','Session Date','Insurance Company','Date Submitted']];
+            for (let i = 1; i < oldRows.length; i++) {
+                const r = oldRows[i];
+                newData.push([r[0],r[1]||'','','',r[2]||'',r[3]||'',r[4]||'']);
+            }
+            await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId, range: 'Claims!A:Z' });
+            await gapi.client.sheets.spreadsheets.values.update({ spreadsheetId, range: 'Claims!A1', valueInputOption: 'RAW', resource: { values: newData } });
+            alert('Data migrated to new format. Account Number and Copay columns added.');
+            await loadSessions();
+        } catch (error) { showError('Failed to migrate data: ' + error.message); }
+    }
+
+    async function migrateTo9Columns(oldRows) {
+        setSyncStatus('Updating format...', 'syncing');
+        try {
+            const newData = [['ID','Client Name','Account Number','Copay','Session Date','Insurance Company','Insurance Number','Diagnosis Code','Date Submitted']];
+            for (let i = 1; i < oldRows.length; i++) {
+                const r = oldRows[i];
+                newData.push([r[0]||'',r[1]||'',r[2]||'',r[3]||'',r[4]||'',r[5]||'','','',r[6]||'']);
+            }
+            await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId, range: 'Claims!A:Z' });
+            await gapi.client.sheets.spreadsheets.values.update({ spreadsheetId, range: 'Claims!A1', valueInputOption: 'RAW', resource: { values: newData } });
+            alert('Format updated. Insurance Number and Diagnosis Code columns added.');
+            await loadSessions();
+        } catch (error) { showError('Failed to update format: ' + error.message); }
+    }
+
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        if (editingSessionId) {
+            submitBtn.textContent = 'Updating...';
+            setSyncStatus('Updating...', 'syncing');
+            const rowIndex = sessions.findIndex(s => s.id === editingSessionId);
+            if (rowIndex === -1) return;
+            const updatedSession = {
+                id: editingSessionId,
+                clientName: document.getElementById('clientName').value.trim(),
+                accountNumber: document.getElementById('accountNumber').value.trim(),
+                copay: formatCopay(document.getElementById('copay').value.trim()),
+                sessionDate: document.getElementById('sessionDate').value,
+                insuranceCompany: document.getElementById('insuranceCompany').value,
+                insuranceNumber: document.getElementById('insuranceNumber').value.trim()||'',
+                diagnosisCode: document.getElementById('diagnosisCode').value.trim()||'',
+                dateSubmitted: document.getElementById('dateSubmitted').value||null
+            };
+            try {
+                await gapi.client.sheets.spreadsheets.values.update({
+                    spreadsheetId, range: `Claims!A${rowIndex+2}:I${rowIndex+2}`, valueInputOption: 'RAW',
+                    resource: { values: [[updatedSession.id,updatedSession.clientName,updatedSession.accountNumber,updatedSession.copay,updatedSession.sessionDate,updatedSession.insuranceCompany,updatedSession.insuranceNumber||'',updatedSession.diagnosisCode||'',updatedSession.dateSubmitted||'']] }
+                });
+                sessions[rowIndex] = updatedSession;
+                clientLookup[updatedSession.clientName.toLowerCase()] = { name: updatedSession.clientName, accountNumber: updatedSession.accountNumber, copay: updatedSession.copay };
+                editingSessionId = null; clearForm(); closeNewClaimModal(); renderSessions(); updateStats(); updateLatestDateSubmitted(); checkPending();
+                setSyncStatus('Synced','success');
+            } catch (error) { showError('Failed to update session: ' + error.message); }
+            finally { submitBtn.disabled = false; submitBtn.textContent = 'Add Session'; }
+        } else {
+            submitBtn.textContent = 'Adding...';
+            setSyncStatus('Saving...', 'syncing');
+            const session = {
+                id: Date.now(),
+                clientName: document.getElementById('clientName').value.trim(),
+                accountNumber: document.getElementById('accountNumber').value.trim(),
+                copay: formatCopay(document.getElementById('copay').value.trim()),
+                sessionDate: document.getElementById('sessionDate').value,
+                insuranceCompany: document.getElementById('insuranceCompany').value,
+                insuranceNumber: document.getElementById('insuranceNumber').value.trim()||'',
+                diagnosisCode: document.getElementById('diagnosisCode').value.trim()||'',
+                dateSubmitted: document.getElementById('dateSubmitted').value||null
+            };
+            try {
+                await gapi.client.sheets.spreadsheets.values.append({
+                    spreadsheetId, range: 'Claims!A:I', valueInputOption: 'RAW',
+                    resource: { values: [[session.id,session.clientName,session.accountNumber,session.copay,session.sessionDate,session.insuranceCompany,session.insuranceNumber||'',session.diagnosisCode||'',session.dateSubmitted||'']] }
+                });
+                sessions.push(session);
+                clientLookup[session.clientName.toLowerCase()] = { name: session.clientName, accountNumber: session.accountNumber, copay: session.copay };
+                clearForm(); closeNewClaimModal(); renderSessions(); updateStats(); updateLatestDateSubmitted(); checkPending();
+                setSyncStatus('Synced','success');
+            } catch (error) { showError('Failed to save session: ' + error.message); }
+            finally { submitBtn.disabled = false; submitBtn.textContent = 'Add Session'; }
+        }
+    }
+
+    async function deleteSession(id) {
+        if (!confirm('Are you sure you want to delete this session?')) return;
+        setSyncStatus('Deleting...', 'syncing');
+        try {
+            sessions = sessions.filter(s => s.id !== id);
+            const allData = [['ID','Client Name','Account Number','Copay','Session Date','Insurance Company','Insurance Number','Diagnosis Code','Date Submitted']];
+            sessions.forEach(s => allData.push([s.id,s.clientName,s.accountNumber,s.copay,s.sessionDate,s.insuranceCompany,s.insuranceNumber||'',s.diagnosisCode||'',s.dateSubmitted||'']));
+            await gapi.client.sheets.spreadsheets.values.clear({ spreadsheetId, range: 'Claims!A:Z' });
+            await gapi.client.sheets.spreadsheets.values.update({ spreadsheetId, range: 'Claims!A1', valueInputOption: 'RAW', resource: { values: allData } });
+            await gapi.client.sheets.spreadsheets.batchUpdate({
+                spreadsheetId,
+                resource: { requests: [{ repeatCell: { range: { sheetId: 0, startRowIndex: 0, endRowIndex: 1 },
+                    cell: { userEnteredFormat: { backgroundColor: { red: 0.29, green: 0.145, blue: 0.125 },
+                        textFormat: { foregroundColor: { red: 1, green: 1, blue: 1 }, bold: true } } },
+                    fields: 'userEnteredFormat(backgroundColor,textFormat)' } }] }
+            });
+            renderSessions(); updateStats(); updateLatestDateSubmitted(); checkPending();
+            setSyncStatus('Synced','success');
+        } catch (error) {
+            console.error('Delete error:', error);
+            showError('Failed to delete session: ' + (error.message || 'Unknown error.'));
+            await loadSessions();
+        }
+    }
+
+    async function markSubmitted(id) {
+        setSyncStatus('Updating...', 'syncing');
+        try {
+            const rowIndex = sessions.findIndex(s => s.id === id);
+            if (rowIndex === -1) return;
+            const today = new Date();
+            const todayFormatted = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+            await gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId, range: `Claims!I${rowIndex+2}`, valueInputOption: 'RAW',
+                resource: { values: [[todayFormatted]] }
+            });
+            sessions[rowIndex].dateSubmitted = todayFormatted;
+            renderSessions(); updateStats(); updateLatestDateSubmitted(); checkPending();
+            setSyncStatus('Synced','success');
+        } catch (error) { showError('Failed to update session: ' + error.message); }
+    }
+
+    function clearForm() {
+        document.getElementById('sessionForm').reset();
+        document.getElementById('sessionDate').valueAsDate = new Date();
+        editingSessionId = null;
+        document.getElementById('submitBtn').textContent = 'Add Session';
+    }
+
+    function editSession(id) {
+        const session = sessions.find(s => s.id === id);
+        if (!session) return;
+        editingSessionId = id;
+        document.getElementById('clientName').value = session.clientName;
+        document.getElementById('accountNumber').value = session.accountNumber;
+        document.getElementById('copay').value = session.copay;
+        document.getElementById('sessionDate').value = session.sessionDate;
+        document.getElementById('insuranceCompany').value = session.insuranceCompany;
+        document.getElementById('insuranceNumber').value = session.insuranceNumber||'';
+        document.getElementById('diagnosisCode').value = session.diagnosisCode||'';
+        document.getElementById('dateSubmitted').value = session.dateSubmitted||'';
+        document.getElementById('submitBtn').textContent = 'Update Session';
+        openNewClaimModal();
+    }
+
+    function renderSessions() {
+        const tbody = document.getElementById('sessionsBody');
+        const searchTerm = document.getElementById('searchClient').value.toLowerCase();
+        const filterInsurance = document.getElementById('filterInsurance').value;
+        const filterStatus = document.getElementById('filterStatus').value;
+        let filteredSessions = sessions.filter(session => {
+            const matchesSearch = session.clientName.toLowerCase().includes(searchTerm);
+            const matchesInsurance = !filterInsurance || session.insuranceCompany === filterInsurance;
+            const matchesStatus = !filterStatus || (filterStatus==='pending'&&!session.dateSubmitted) || (filterStatus==='submitted'&&session.dateSubmitted);
+            const matchesHideCompleted = !hideCompleted || !session.dateSubmitted;
+            return matchesSearch && matchesInsurance && matchesStatus && matchesHideCompleted;
+        });
+        if (sortByStatus) {
+            filteredSessions.sort((a,b) => {
+                const aS = a.dateSubmitted?1:0, bS = b.dateSubmitted?1:0;
+                if (aS !== bS) return aS - bS;
+                return new Date(b.sessionDate) - new Date(a.sessionDate);
+            });
+        } else {
+            filteredSessions.sort((a,b) => sortOrder==='desc' ? new Date(b.sessionDate)-new Date(a.sessionDate) : new Date(a.sessionDate)-new Date(b.sessionDate));
+        }
+        if (filteredSessions.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" class="empty-state">No sessions match your filters.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = filteredSessions.map(session => {
+            const isSubmitted = !!session.dateSubmitted;
+            const statusBadge = isSubmitted
+                ? `<span class="status-submitted">● Submitted</span>`
+                : `<span class="status-pending">● Pending</span>`;
+            const submittedDisplay = session.dateSubmitted ? formatDate(session.dateSubmitted) : '—';
+            return `
+                <tr>
+                    <td style="font-weight:500;">${session.clientName}</td>
+                    <td style="color:var(--muted);">${formatDate(session.sessionDate)}</td>
+                    <td>${session.insuranceCompany}</td>
+                    <td style="color:var(--muted);">${session.insuranceNumber||''}</td>
+                    <td style="color:var(--muted);">${session.diagnosisCode||''}</td>
+                    <td style="color:var(--muted);">${session.accountNumber}</td>
+                    <td>${session.copay}</td>
+                    <td style="color:var(--muted);">${submittedDisplay}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
+                            <div>
+                                <button class="action-btn" onclick="editSession(${session.id})">Edit</button>
+                                <button class="btn btn-secondary action-btn" onclick="deleteSession(${session.id})">Delete</button>
+                            </div>
+                            ${!isSubmitted ? `<button class="action-btn submit-action" onclick="markSubmitted(${session.id})" style="width:100%;">Mark Submitted</button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString + 'T00:00:00');
+        return date.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    }
+
+    function updateStats() {
+        const pending = sessions.filter(s => !s.dateSubmitted).length;
+        document.getElementById('pendingCount').textContent = pending;
+        updateMonthlySubmitted();
+    }
+
+    function checkPending() {}
+
+    function setSyncStatus(message, type) {
+        const statusEl = document.getElementById('syncStatus');
+        statusEl.className = 'sync-status';
+        if (type === 'syncing') {
+            statusEl.classList.add('syncing');
+            statusEl.innerHTML = '<div class="loading"></div> <span>' + message + '</span>';
+        } else if (type === 'error') {
+            statusEl.classList.add('error');
+            statusEl.innerHTML = '<span>✗</span> <span>' + message + '</span>';
+        } else {
+            statusEl.innerHTML = '<span class="sync-dot"></span> <span>' + message + '</span>';
+        }
+    }
+
+    function showError(message) { setSyncStatus('Error', 'error'); alert(message); }
+
+    function signOut() {
+        if (confirm('Sign out? You can sign back in anytime.')) { accessToken = null; location.reload(); }
+    }
+
+    function formatCopay(value) {
+        if (!value || value.trim() === '') return '$0.00';
+        value = value.replace(/[\$\s]/g, '');
+        if (value && !isNaN(value)) return '$' + parseFloat(value).toFixed(2);
+        return '$0.00';
+    }
+
+    let quickAddOpen = false;
+    function toggleQuickAdd() {
+        quickAddOpen = !quickAddOpen;
+        const wrapper = document.getElementById('quickAddWrapper');
+        const btn = document.getElementById('quickAddToggleBtn');
+        if (quickAddOpen) {
+            wrapper.classList.add('open'); btn.classList.add('open');
+            document.getElementById('inline_sessionDate').valueAsDate = new Date();
+        } else {
+            wrapper.classList.remove('open'); btn.classList.remove('open');
+        }
+    }
+
+    function clearInlineForm() {
+        document.getElementById('inlineSessionForm').reset();
+        document.getElementById('inline_sessionDate').valueAsDate = new Date();
+        document.getElementById('quickAddSuccess').classList.remove('visible');
+    }
+
+    async function handleInlineFormSubmit(e) {
+        e.preventDefault();
+        const submitBtn = document.getElementById('inlineSubmitBtn');
+        submitBtn.disabled = true; submitBtn.textContent = 'Adding...';
+        const session = {
+            id: Date.now(),
+            clientName: document.getElementById('inline_clientName').value.trim(),
+            accountNumber: document.getElementById('inline_accountNumber').value.trim(),
+            copay: formatCopay(document.getElementById('inline_copay').value.trim()),
+            sessionDate: document.getElementById('inline_sessionDate').value,
+            insuranceCompany: document.getElementById('inline_insuranceCompany').value,
+            insuranceNumber: document.getElementById('inline_insuranceNumber').value.trim()||'',
+            diagnosisCode: document.getElementById('inline_diagnosisCode').value.trim()||'',
+            dateSubmitted: document.getElementById('inline_dateSubmitted').value||null
+        };
+        try {
+            await gapi.client.sheets.spreadsheets.values.append({
+                spreadsheetId, range: 'Claims!A:I', valueInputOption: 'RAW',
+                resource: { values: [[session.id,session.clientName,session.accountNumber,session.copay,session.sessionDate,session.insuranceCompany,session.insuranceNumber,session.diagnosisCode,session.dateSubmitted||'']] }
+            });
+            sessions.push(session);
+            clientLookup[session.clientName.toLowerCase()] = { name: session.clientName, accountNumber: session.accountNumber, copay: session.copay };
+            ['inline_clientName','inline_accountNumber','inline_copay','inline_insuranceNumber','inline_diagnosisCode','inline_dateSubmitted'].forEach(id => document.getElementById(id).value='');
+            document.getElementById('inline_insuranceCompany').value = '';
+            document.getElementById('inline_sessionDate').valueAsDate = new Date();
+            const successEl = document.getElementById('quickAddSuccess');
+            successEl.classList.add('visible');
+            setTimeout(() => successEl.classList.remove('visible'), 2500);
+            document.getElementById('inline_clientName').focus();
+            renderSessions(); updateStats(); updateLatestDateSubmitted();
+            setSyncStatus('Synced','success');
+        } catch (error) { showError('Failed to save session: ' + error.message); }
+        finally { submitBtn.disabled = false; submitBtn.textContent = 'Add Session'; }
+    }
+
+    function toggleSort() {
+        sortOrder = sortOrder==='desc'?'asc':'desc';
+        document.getElementById('sortBtn').textContent = sortOrder==='desc'?'Newest First ▼':'Oldest First ▲';
+        sortByStatus = false;
+        document.getElementById('sortStatusBtn').textContent = 'Sort by Status';
+        renderSessions();
+    }
+
+    function toggleSortByStatus() {
+        sortByStatus = !sortByStatus;
+        document.getElementById('sortStatusBtn').textContent = sortByStatus ? 'Sort by Status ✓' : 'Sort by Status';
+        renderSessions();
+    }
+
+    function toggleHideCompleted() {
+        hideCompleted = !hideCompleted;
+        const btn = document.getElementById('hideCompletedBtn');
+        btn.textContent = hideCompleted ? 'Show Completed' : 'Hide Completed';
+        btn.style.background = hideCompleted ? 'var(--mauve)' : '';
+        btn.style.color = hideCompleted ? 'white' : '';
+        btn.style.borderColor = hideCompleted ? 'var(--mauve)' : '';
+        renderSessions();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const clientNameInput = document.getElementById('clientName');
+        if (clientNameInput) {
+            clientNameInput.addEventListener('input', function(e) {
+                const v = e.target.value.toLowerCase().trim();
+                if (v.length > 0 && clientLookup[v]) {
+                    document.getElementById('accountNumber').value = clientLookup[v].accountNumber;
+                    document.getElementById('copay').value = clientLookup[v].copay;
+                }
+            });
+        }
+        const inlineClientNameInput = document.getElementById('inline_clientName');
+        if (inlineClientNameInput) {
+            inlineClientNameInput.addEventListener('input', function(e) {
+                const v = e.target.value.toLowerCase().trim();
+                if (v.length > 0 && clientLookup[v]) {
+                    document.getElementById('inline_accountNumber').value = clientLookup[v].accountNumber;
+                    document.getElementById('inline_copay').value = clientLookup[v].copay;
+                }
+            });
+        }
+        ['copay','inline_copay'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('blur', function(e) { e.target.value = formatCopay(e.target.value); });
+        });
+    });
+
+    function openNewClaimModal() {
+        document.getElementById('newClaimModal').classList.add('active');
+        if (!editingSessionId) document.getElementById('sessionDate').valueAsDate = new Date();
+    }
+    function closeNewClaimModal() {
+        document.getElementById('newClaimModal').classList.remove('active');
+        if (!editingSessionId) clearForm();
+    }
+    function openClientsModal() { document.getElementById('clientsModal').classList.add('active'); renderClientsList(); }
+    function closeClientsModal() { document.getElementById('clientsModal').classList.remove('active'); }
+    function openAllTimeStatsModal() { document.getElementById('allTimeStatsModal').classList.add('active'); updateAllTimeStats(); }
+    function closeAllTimeStatsModal() { document.getElementById('allTimeStatsModal').classList.remove('active'); }
+
+    window.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+            e.target.classList.remove('active');
+            if (e.target.id==='newClaimModal'&&!editingSessionId) clearForm();
+        }
+    });
+    window.addEventListener('keydown', function(e) {
+        if (e.key==='Escape') { closeNewClaimModal(); closeClientsModal(); closeAllTimeStatsModal(); }
+    });
+
+    let tableExpanded = true;
+    function toggleTable() {
+        tableExpanded = !tableExpanded;
+        const wrapper = document.getElementById('tableWrapper');
+        const btn = document.getElementById('tableToggleBtn');
+        if (tableExpanded) { wrapper.classList.remove('collapsed'); btn.textContent = '▼ Hide Sessions Table'; }
+        else { wrapper.classList.add('collapsed'); btn.textContent = '▶ Show Sessions Table'; }
+    }
+
+    function renderClientsList() {
+        const tbody = document.getElementById('clientsTableBody');
+        const clientsMap = {};
+        sessions.forEach(session => {
+            const name = session.clientName;
+            if (!clientsMap[name]) clientsMap[name] = { name, totalClaims:0, pendingClaims:0, lastSubmission:null };
+            clientsMap[name].totalClaims++;
+            if (!session.dateSubmitted) clientsMap[name].pendingClaims++;
+            if (session.dateSubmitted && (!clientsMap[name].lastSubmission || new Date(session.sessionDate)>new Date(clientsMap[name].lastSubmission)))
+                clientsMap[name].lastSubmission = session.sessionDate;
+        });
+        const clientsArray = Object.values(clientsMap).sort((a,b) => a.name.localeCompare(b.name));
+        if (clientsArray.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:var(--muted);">No clients yet</td></tr>';
+            return;
+        }
+        tbody.innerHTML = clientsArray.map(client => `
+            <tr>
+                <td style="font-weight:500;">${client.name}</td>
+                <td>${client.totalClaims}</td>
+                <td>${client.pendingClaims}</td>
+                <td>${client.lastSubmission ? formatDate(client.lastSubmission) : '—'}</td>
+            </tr>
+        `).join('');
+    }
+
+    function updateAllTimeStats() {
+        const total = sessions.length;
+        const submitted = sessions.filter(s => s.dateSubmitted).length;
+        document.getElementById('allTimeTotalSessions').textContent = total;
+        document.getElementById('allTimeSubmittedCount').textContent = submitted;
+        document.getElementById('allTimePendingCount').textContent = total - submitted;
+    }
+
+    function updateMonthlySubmitted() {
+        const today = new Date();
+        const currentMonth = today.getMonth(), currentYear = today.getFullYear();
+        const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        document.getElementById('monthlySubmittedLabel').textContent = `Submitted Since ${monthNames[currentMonth].slice(0,3)} 1st`;
+        const monthlyCount = sessions.filter(s => {
+            if (!s.dateSubmitted) return false;
+            const d = new Date(s.sessionDate + 'T00:00:00');
+            return d.getMonth()===currentMonth && d.getFullYear()===currentYear;
+        }).length;
+        document.getElementById('monthlySubmittedCount').textContent = monthlyCount;
+    }
+
+    function updateLatestDateSubmitted() {
+        const submitted = sessions.filter(s => s.dateSubmitted);
+        if (submitted.length === 0) { document.getElementById('latestDateSubmitted').textContent = '--'; return; }
+        submitted.sort((a,b) => new Date(b.sessionDate)-new Date(a.sessionDate));
+        const latest = submitted[0];
+        const date = new Date(latest.sessionDate + 'T00:00:00');
+        const formatted = date.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+        document.getElementById('latestDateSubmitted').textContent = `${formatted} — ${latest.clientName}`;
+    }
+
+    window.onload = function() {
+        const savedClientId = localStorage.getItem('googleClientId');
+        if (savedClientId) document.getElementById('clientIdInput').value = savedClientId;
+    };
+
+    window.gapiLoaded = gapiLoaded;
+    window.gisLoaded = gisLoaded;
+</script>
+<script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+<script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+</body>
+</html>
